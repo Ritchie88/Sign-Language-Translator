@@ -40,6 +40,7 @@ def buildModel():
         model.add(Dense(units = 512 , activation = 'relu'))
         model.add(Dropout(0.3))
         model.add(Dense(units = 24 , activation = 'softmax'))
+        return model
         
 
 def main():
