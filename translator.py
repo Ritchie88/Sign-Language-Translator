@@ -1,31 +1,31 @@
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
 import tensorflow as tf
-import cv2
+import cv2 as cv
 import mediapipe as mp
 from keras.models import load_model
 import numpy as np
 import time
 import pandas as pd
 
-model = load_model('model.h5')
+model = load_model('SLmodel.h5')
 
 mphands = mp.solutions.hands
 hands = mphands.Hands()
 mp_drawing = mp.solutions.drawing_utils
-cap = cv2.VideoCapture(0)
+video = cv.VideoCapture(0)
 
-_, frame = cap.read()
+_, frame = video.read()
 
-h, w, c = frame.shape
+height, width, c = frame.shape
 
 img_counter = 0
 analysisframe = ''
 letterpred = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y']
 while True:
-    _, frame = cap.read()
+    _, frame = video.read()
 
-    k = cv2.waitKey(1)
+    k = cv.waitKey(1)
     if k%256 == 27:
         # ESC pressed
         print("Escape hit, closing...")
@@ -34,18 +34,18 @@ while True:
         # SPACE pressed
         analysisframe = frame
         showframe = analysisframe
-        cv2.imshow("Frame", showframe)
-        framergbanalysis = cv2.cvtColor(analysisframe, cv2.COLOR_BGR2RGB)
+        cv.imshow("Frame", showframe)
+        framergbanalysis = cv.cvtColor(analysisframe, cv.COLOR_BGR2RGB)
         resultanalysis = hands.process(framergbanalysis)
         hand_landmarksanalysis = resultanalysis.multi_hand_landmarks
         if hand_landmarksanalysis:
             for handLMsanalysis in hand_landmarksanalysis:
                 x_max = 0
                 y_max = 0
-                x_min = w
-                y_min = h
+                x_min = width
+                y_min = height
                 for lmanalysis in handLMsanalysis.landmark:
-                    x, y = int(lmanalysis.x * w), int(lmanalysis.y * h)
+                    x, y = int(lmanalysis.x * width), int(lmanalysis.y * height)
                     if x > x_max:
                         x_max = x
                     if x < x_min:
@@ -59,9 +59,9 @@ while True:
                 x_min -= 20
                 x_max += 20 
 
-        analysisframe = cv2.cvtColor(analysisframe, cv2.COLOR_BGR2GRAY)
+        analysisframe = cv.cvtColor(analysisframe, cv.COLOR_BGR2GRAY)
         analysisframe = analysisframe[y_min:y_max, x_min:x_max]
-        analysisframe = cv2.resize(analysisframe,(28,28))
+        analysisframe = cv.resize(analysisframe,(28,28))
 
 
         nlist = []
@@ -99,17 +99,17 @@ while True:
                 print('Confidence 3: ', 100*value)
         time.sleep(5)
 
-    framergb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    framergb = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
     result = hands.process(framergb)
     hand_landmarks = result.multi_hand_landmarks
     if hand_landmarks:
         for handLMs in hand_landmarks:
             x_max = 0
             y_max = 0
-            x_min = w
-            y_min = h
+            x_min = width
+            y_min = height
             for lm in handLMs.landmark:
-                x, y = int(lm.x * w), int(lm.y * h)
+                x, y = int(lm.x * width), int(lm.y * height)
                 if x > x_max:
                     x_max = x
                 if x < x_min:
@@ -122,8 +122,8 @@ while True:
             y_max += 20
             x_min -= 20
             x_max += 20
-            cv2.rectangle(frame, (x_min, y_min), (x_max, y_max), (0, 255, 0), 2)
-    cv2.imshow("Frame", frame)
+            cv.rectangle(frame, (x_min, y_min), (x_max, y_max), (0, 255, 0), 2)
+    cv.imshow("Frame", frame)
 
-cap.release()
-cv2.destroyAllWindows()
+video.release()
+cv.destroyAllWindows()
